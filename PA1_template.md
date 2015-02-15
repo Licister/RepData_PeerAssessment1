@@ -54,7 +54,7 @@ steptotal <- data.frame(date = names(steptotal), total = steptotal, row.names = 
 Having calculated the totals, we can now build the histogram. We will also include the lines for the mean (red) and median (blue).
 
 ```r
-hist(steptotal$total, breaks = 11, xaxt = "n", col = "darkseagreen", xlab = "Average of total steps taken per day", main =paste("Frequency of total steps taken per day", "\n(NAs removed)"))
+hist(steptotal$total, breaks = 11, xaxt = "n", col = "darkseagreen", xlab = "Average of total steps taken each day", main =paste("Histogram of the total number of steps taken each day", "\n(NAs removed)"))
 axis(1, at = seq(0, 22000, 2000), cex.axis = 0.8)
 abline(v = mean(steptotal$total), col = "red", lwd = 3)
 abline(v = median(steptotal$total), col = "blue", lwd = 3)
@@ -194,7 +194,7 @@ newsteptotal <- data.frame(date = names(newsteptotal), total = newsteptotal, row
 Plotting the histogram of the total number of steps taken per day, including the mean (orange), median (purple), and the mean and median from the original data set (red and blue):
 
 ```r
-hist(newsteptotal$total, breaks = 11, xaxt = "n", col = "darkseagreen", xlab = "Average of total steps taken per day", main =paste("Frequency of total steps taken per day", "\n(NAs replaced)"))
+hist(newsteptotal$total, breaks = 11, xaxt = "n", col = "darkseagreen", xlab = "Average of total steps taken per day", main =paste("Histogram of the total number of steps taken each day", "\n(NAs replaced)"))
 axis(1, at = seq(0, 22000, 2000), cex.axis = 0.8)
 abline(v = mean(newsteptotal$total), col = "orange", lwd = 3)
 abline(v = median(newsteptotal$total), col = "purple", lwd = 3)
@@ -293,7 +293,7 @@ weekmean <- aggregate(steps ~ interval + day, data = newstep, mean)
 Using the `lattice` package, we'll plot the average number of steps averaged across weekday days and weekend days, along the 5-minute interval.
 
 ```r
-xyplot(steps ~ interval | day, data = replace(weekmean, "day", structure(weekmean$day, levels = c("Weekday", "Weekend"))), type = "l", layout = c(1, 2), xlab = "5-minute interval", ylab = "Average number of steps taken", main= "Average of steps taken in each 5-minute interval, across weekends and weekdays", par.settings=list(par.main.text=list(cex=0.9)), col = "darkcyan", lwd = 1.5)
+xyplot(steps ~ interval | day, data = replace(weekmean, "day", structure(weekmean$day, levels = c("Weekday", "Weekend"))), type = "l", layout = c(1, 2), xlab = "5-minute interval", ylab = "Average number of steps taken", main= "Average number of steps taken per 5-minute interval, across weekends and weekdays", par.settings=list(par.main.text=list(cex=0.9)), col = "darkcyan", lwd = 1.5)
 ```
 
 ![plot of chunk latplot](figure/latplot-1.png) 
