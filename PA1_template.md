@@ -44,60 +44,58 @@ Sys.setlocale("LC_TIME", "C")
 
 ##What is the mean total number of steps taken per day?
 
-We will start by calculating the total number of steps taken per day. First we use ` tapply` to sum the number of steps per day, then we convert the array to a data frame to be able to manipulate the data more easily. There is no need to print the result since the assignment does not ask for us to report it.
+We will calculate the total number of steps taken per day using `aggregate`. There is no need to print the result since the assignment does not ask for us to report it.
 
 ```r
-steptotal <- tapply(stepdata$steps, stepdata$date, sum, na.rm = TRUE)
-steptotal <- data.frame(date = names(steptotal), total = steptotal, row.names = NULL)
+steptotal <- aggregate(steps ~ date, stepdata, sum, na.rm = TRUE)
 ```
  
 Having calculated the totals, we can now build the histogram. We will also include the lines for the mean (red) and median (blue).
 
 ```r
-hist(steptotal$total, breaks = 11, xaxt = "n", col = "darkseagreen", xlab = "Average of total steps taken each day", main =paste("Histogram of the total number of steps taken each day", "\n(NAs removed)"))
+hist(steptotal$steps, breaks = 11, xaxt = "n", col = "darkseagreen", xlab = "Average of total steps taken each day", main =paste("Histogram of the total number of steps taken each day", "\n(NAs removed)"))
 axis(1, at = seq(0, 22000, 2000), cex.axis = 0.8)
-abline(v = mean(steptotal$total), col = "red", lwd = 3)
-abline(v = median(steptotal$total), col = "blue", lwd = 3)
+abline(v = mean(steptotal$steps), col = "red", lwd = 3)
+abline(v = median(steptotal$steps), col = "blue", lwd = 3)
 legend("topright", lwd = 3, col = c("red", "blue"), legend = c("Mean", "Median"), cex = 0.8)
 ```
 
 ![plot of chunk histsteptotal](figure/histsteptotal-1.png) 
 
-We can see that the mean is smaller than the median and that they're both close to 10 000 steps per day.
+We can see that the mean and median are very close to each other, which is why we can only see one of them in the histogram.
 
 ```r
-mean(steptotal$total)
+mean(steptotal$steps)
 ```
 
 ```
-## [1] 9354.23
+## [1] 10766.19
 ```
 
 ```r
-median(steptotal$total)
+median(steptotal$steps)
 ```
 
 ```
-## [1] 10395
+## [1] 10765
 ```
 <br />  
 
 
 ##What is the average daily activity pattern?
 
-We start by calculating the average of steps taken on a 5 minute interval across all days. Then we convert the array to a data frame to allow for better data manipulation.
+Calculating the average of steps taken on a 5 minute interval across all days:
 
 ```r
-stepint <- tapply(stepdata$steps, stepdata$interval, mean, na.rm = TRUE)
-stepint <- data.frame(interval = as.integer(as.character(names(stepint))), mean = stepint, row.names = NULL)
+stepint <- aggregate(steps ~ interval, stepdata, mean, na.rm = TRUE)
 ```
 
 We can now plot the average number of steps taken in each 5 minute interval:
 
 ```r
-plot(stepint$interval, stepint$mean, type ="l", lwd =2, col = "darkcyan", xaxt = "n", xlab = "5-minute Interval", ylab = "Average number of steps taken", main=paste("Average number of steps taken in each 5-minute interval", "\n(averaged across all days)"), bty = "n")
+plot(stepint$interval, stepint$steps, type ="l", lwd =2, col = "darkcyan", xaxt = "n", xlab = "5-minute Interval", ylab = "Average number of steps taken", main=paste("Average number of steps taken in each 5-minute interval", "\n(averaged across all days)"), bty = "n")
 axis(1, at = seq(0, 2355, 250), cex.axis= 0.8)
-abline(v = stepint[stepint$mean == max(stepint$mean), "interval"], col = "orange", lwd =2, lty = 3)
+abline(v = stepint[stepint$steps == max(stepint$steps), "interval"], col = "orange", lwd =2, lty = 3)
 legend("topright", lwd = 2, col ="orange", legend = c("Maximum"), cex = 0.8, lty = 3)
 ```
 
@@ -106,11 +104,11 @@ legend("topright", lwd = 2, col ="orange", legend = c("Maximum"), cex = 0.8, lty
 We can see where the maximum is on the plot. To get the exact interval and value of the mean for that interval:
 
 ```r
-stepint[stepint$mean == max(stepint$mean),]
+stepint[stepint$steps == max(stepint$steps),]
 ```
 
 ```
-##     interval     mean
+##     interval    steps
 ## 104      835 206.1698
 ```
 The 5-minute interval with the maximum number of steps is the 835 interval.
@@ -129,11 +127,11 @@ length(which(is.na(stepdata$steps)))
 ## [1] 2304
 ```
 
-To fill in the missing values, we'll use the median of the respective 5-minute interval. The first step is to calculate the median for each interval using `tapply`, and then converting the array to a data frame.
+To fill in the missing values, we'll use the median of the respective 5-minute interval. We can start by calculating the median, and we'll change the name of the "steps" column to "median".
 
 ```r
-stepmedian <- tapply(stepdata$steps, stepdata$interval, median, na.rm = TRUE)
-stepmedian <- data.frame(interval = names(stepmedian), median = stepmedian, row.names = NULL)
+stepmedian <- aggregate(steps ~ interval, stepdata, median, na.rm = TRUE)
+names(stepmedian)[2] <- "median"
 ```
 
 We'll copy the original data set and merge the new one with the data frame containing the median for each interval. Since the `merge` function will order the rows by interval, we'll also order the new data set to match the original order.
@@ -187,73 +185,59 @@ newstep <- newstep[, c(2, 3, 1)]
 We'll now calculate the total number of steps taken each day:
 
 ```r
-newsteptotal <- tapply(newstep$steps, newstep$date, sum)
-newsteptotal <- data.frame(date = names(newsteptotal), total = newsteptotal, row.names = NULL)
+newsteptotal <- aggregate(steps ~ date, newstep, sum, na.rm = TRUE)
 ```
 
 Plotting the histogram of the total number of steps taken per day, including the mean (orange), median (purple), and the mean and median from the original data set (red and blue):
 
 ```r
-hist(newsteptotal$total, breaks = 11, xaxt = "n", col = "darkseagreen", xlab = "Average of total steps taken per day", main =paste("Histogram of the total number of steps taken each day", "\n(NAs replaced)"))
+hist(newsteptotal$steps, breaks = 11, xaxt = "n", col = "darkseagreen", xlab = "Average of total steps taken per day", main =paste("Histogram of the total number of steps taken each day", "\n(NAs replaced)"))
 axis(1, at = seq(0, 22000, 2000), cex.axis = 0.8)
-abline(v = mean(newsteptotal$total), col = "orange", lwd = 3)
-abline(v = median(newsteptotal$total), col = "purple", lwd = 3)
-abline(v = mean(steptotal$total), col = "red", lwd = 3)
-abline(v = median(steptotal$total), col = "blue", lwd = 3)
+abline(v = mean(newsteptotal$steps), col = "orange", lwd = 3)
+abline(v = median(newsteptotal$steps), col = "purple", lwd = 3)
+abline(v = mean(steptotal$steps), col = "red", lwd = 3)
+abline(v = median(steptotal$steps), col = "blue", lwd = 3)
 legend("topright", lwd = 3, col = c("orange", "purple", "red", "blue"), legend = c("Mean", "Median", "Mean (original)", "Median (original)"), cex = 0.8)
 ```
 
 ![plot of chunk newhist](figure/newhist-1.png) 
 
-Notice the medians overlap, because we used the median of the 5-minute interval to fill in the NAs.
 Calculating both original and new mean:
 
 ```r
-mean(steptotal$total)
+mean(steptotal$steps)
 ```
 
 ```
-## [1] 9354.23
+## [1] 10766.19
 ```
 
 ```r
-mean(newsteptotal$total)
+mean(newsteptotal$steps)
 ```
 
 ```
 ## [1] 9503.869
 ```
-The new mean is slightly higher because the NAs values were replaced with the median values for each interval. Assuming the median of each interval follows the same pattern of the median for the total number of steps per day, then the median of each interval is higher than the respective mean (see the mean and median of total steps per day calculated previously for the original data set). This means that the NAs were replaced with values higher than the mean, which would in turn increase the average of the total number of steps taken per day.
-
-As we can see, the median remains the same:
+Calculating both original and new median:
 
 ```r
-median(steptotal$total)
+median(steptotal$steps)
+```
+
+```
+## [1] 10765
+```
+
+```r
+median(newsteptotal$steps)
 ```
 
 ```
 ## [1] 10395
 ```
-
-```r
-median(newsteptotal$total)
-```
-
-```
-## [1] 10395
-```
-
-Imputing missing data with this particular method slightly increased the mean of total steps taken each day, but the median remained the same. Overall, the change does not seem very significant:
-
-```r
-percent <- (mean(newsteptotal$total) - mean(steptotal$total)) / mean(steptotal$total)
-percent
-```
-
-```
-## [1] 0.01599697
-```
-As we can see, the mean only increased by 1.6%.
+Both the mean and median decreased a bit, but the mean decreased more.
+This decrease is likely because there were many NA values that weren't included in the calculation of the mean and that were now replaced by low values or even zeros, lowering both the overall mean and median.
 <br />  
 <br />  
 
